@@ -68,7 +68,7 @@ ipc.on('saveCurrentPage', function () {
     return
   }
 
-  var savePath = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {})
+//  var savePath = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {})
 
   // savePath will be undefined if the save dialog is canceled
   if (savePath) {

@@ -46,9 +46,9 @@ registerCustomBang({
         height: Math.round(rect.height)
       }
 
-      remote.getCurrentWindow().capturePage(imageRect, function (image) {
+      /* remote.getCurrentWindow().capturePage(imageRect, function (image) {
         remote.getCurrentWebContents().downloadURL(image.toDataURL())
-      })
+      }) */
     }, 16)
   }
 })

@@ -104,7 +104,7 @@ bindWebviewEvent('did-get-redirect-request', function (e, oldURL, newURL, isMain
 
 // set the permissionRequestHandler for non-private tabs
 
-remote.session.defaultSession.setPermissionRequestHandler(pagePermissionRequestHandler)
+// remote.session.defaultSession.setPermissionRequestHandler(pagePermissionRequestHandler)
 
 function getWebviewDom (options) {
   var w = document.createElement('webview')
@@ -126,7 +126,7 @@ function getWebviewDom (options) {
     // register permissionRequestHandler for this tab
     // private tabs use a different session, so the default permissionRequestHandler won't apply
 
-    remote.session.fromPartition(partition).setPermissionRequestHandler(pagePermissionRequestHandler)
+ //   remote.session.fromPartition(partition).setPermissionRequestHandler(pagePermissionRequestHandler)
 
     // enable ad/tracker/contentType blocking in this tab if needed
 

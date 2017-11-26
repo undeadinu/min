@@ -65,7 +65,7 @@ var sessionRestore = {
 
       console.error('restoring session failed: ', e)
 
-      var backupSavePath = require('path').join(remote.app.getPath('userData'), 'sessionRestoreBackup-' + Date.now() + '.json')
+   //   var backupSavePath = require('path').join(remote.app.getPath('userData'), 'sessionRestoreBackup-' + Date.now() + '.json')
 
       require('fs').writeFileSync(backupSavePath, savedStringData)
 

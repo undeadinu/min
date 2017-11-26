@@ -4,9 +4,9 @@ var webviewMenu = {
   lastDisplayedAt: 0,
   showMenu: function (data) { // data comes from a context-menu event
     if (!Menu || !MenuItem || !clipboard) {
-      Menu = remote.Menu
+   /*   Menu = remote.Menu
       MenuItem = remote.MenuItem
-      clipboard = remote.clipboard
+      clipboard = remote.clipboard */
     }
 
     var menu = new Menu()
@@ -85,7 +85,7 @@ var webviewMenu = {
         new MenuItem({
           label: l('saveImageAs'),
           click: function () {
-            remote.getCurrentWebContents().downloadURL(image)
+        //    remote.getCurrentWebContents().downloadURL(image)
           }
         })
       ])
@@ -186,7 +186,7 @@ var webviewMenu = {
       menu.append(new MenuItem({ type: 'separator' }))
     })
 
-    menu.popup(remote.getCurrentWindow())
+  //  menu.popup(remote.getCurrentWindow())
 
     webviewMenu.lastDisplayedAt = Date.now()
   }
