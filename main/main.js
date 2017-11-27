@@ -1,24 +1,15 @@
 const electron = require('electron')
-const fs = require('fs')
-const path = require('path')
 const app = electron.app // Module to control application life.
-const protocol = electron.protocol // Module to control protocol handling
 const BrowserWindow = electron.BrowserWindow // Module to create native browser window.
-const ipc = electron.ipcMain
-
-var userDataPath = app.getPath('userData')
 
 const browserPage = 'file://' + __dirname + '/index.html'
 
+function l (str) {
+  return str
+}
+
 var mainWindow = null
 var isFocusMode = false
-var appIsReady = false
-
-var saveWindowBounds = function () {
-  if (mainWindow) {
-    fs.writeFile(path.join(userDataPath, 'windowBounds.json'), JSON.stringify(mainWindow.getBounds()))
-  }
-}
 
 function sendIPCToWindow (window, action, data) {
   // if there are no windows, create a new one
@@ -38,38 +29,19 @@ function openTabInWindow (url) {
 }
 
 function createWindow (cb) {
-  var savedBounds = fs.readFile(path.join(userDataPath, 'windowBounds.json'), 'utf-8', function (e, data) {
-    if (e || !data) { // there was an error, probably because the file doesn't exist
-      var size = electron.screen.getPrimaryDisplay().workAreaSize
-      var bounds = {
-        x: 0,
-        y: 0,
-        width: size.width,
-        height: size.height
-      }
-    } else {
-      var bounds = JSON.parse(data)
-    }
+  var size = electron.screen.getPrimaryDisplay().workAreaSize
+  var bounds = {
+    x: 0,
+    y: 0,
+    width: size.width,
+    height: size.height
+  }
 
+  createWindowWithBounds(bounds, false)
 
-// maximizes the window frame in windows 10
-// fixes https://github.com/minbrowser/min/issues/214
-// should be removed once https://github.com/electron/electron/issues/4045 is fixed
-    if (process.platform === 'win32') {
-      if (bounds.x === 0 || bounds.y === 0 || bounds.x === -8 || bounds.y === -8) {
-        var screenSize = electron.screen.getPrimaryDisplay().workAreaSize
-        if ((screenSize.width === bounds.width || bounds.width - screenSize.width === 16) && (screenSize.height === bounds.height || bounds.height - screenSize.height === 16)) {
-          var shouldMaximize = true
-        }
-      }
-    }
-
-    createWindowWithBounds(bounds, shouldMaximize)
-
-    if (cb) {
-      cb()
-    }
-  })
+  if (cb) {
+    cb()
+  }
 }
 
 function createWindowWithBounds (bounds, shouldMaximize) {
@@ -77,24 +49,11 @@ function createWindowWithBounds (bounds, shouldMaximize) {
     width: bounds.width,
     height: bounds.height,
     x: bounds.x,
-    y: bounds.y,
-    minWidth: 320,
-    minHeight: 500,
-    titleBarStyle: 'hidden-inset',
-    icon: __dirname + '/icons/icon256.png'
+    y: bounds.y
   })
 
   // and load the index.html of the app.
   mainWindow.loadURL(browserPage)
-
-  if (shouldMaximize) {
-    mainWindow.maximize()
-  }
-
-  // save the window size for the next launch of the app
-  mainWindow.on('close', function () {
-    saveWindowBounds()
-  })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -104,48 +63,6 @@ function createWindowWithBounds (bounds, shouldMaximize) {
     mainWindow = null
   })
 
-  /* handle pdf downloads - ipc recieved in fileDownloadManager.js */
-/*
-  mainWindow.webContents.session.on('will-download', function (event, item, webContents) {
-    var itemURL = item.getURL()
-    if (item.getMimeType() === 'application/pdf' && itemURL.indexOf('blob:') !== 0 && itemURL.indexOf('#pdfjs.action=download') === -1) { // clicking the download button in the viewer opens a blob url, so we don't want to open those in the viewer (since that would make it impossible to download a PDF)
-      event.preventDefault()
-      sendIPCToWindow(mainWindow, 'openPDF', {
-        url: itemURL,
-        webContentsId: webContents.getId(),
-        event: event,
-        item: item // as of electron 0.35.1, this is an empty object
-      })
-    }
-    return true
-  })
-
-  mainWindow.on('enter-full-screen', function () {
-    sendIPCToWindow(mainWindow, 'enter-full-screen')
-  })
-
-  mainWindow.on('leave-full-screen', function () {
-    sendIPCToWindow(mainWindow, 'leave-full-screen')
-  })
-
-  mainWindow.on('app-command', function (e, command) {
-    if (command === 'browser-backward') {
-      sendIPCToWindow(mainWindow, 'goBack')
-    } else if (command === 'browser-forward') {
-      sendIPCToWindow(mainWindow, 'goForward')
-    }
-  })
-
-  // prevent remote pages from being loaded using drag-and-drop, since they would have node access
-  mainWindow.webContents.on('will-navigate', function (e, url) {
-    if (url !== browserPage) {
-      e.preventDefault()
-    }
-  })
-
-  registerFiltering() // register filtering for the default session
-
-  */
   return mainWindow
 }
 
@@ -161,67 +78,9 @@ app.on('window-all-closed', function () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.on('ready', function () {
-  appIsReady = true
-
-  createWindow(function () {
-    /*
-    mainWindow.webContents.on('did-finish-load', function () {
-      // if a URL was passed as a command line argument (probably because Min is set as the default browser on Linux), open it.
-      if (process.argv && process.argv[1] && process.argv[1].toLowerCase() !== __dirname.toLowerCase() && process.argv[1].indexOf('://') !== -1) {
-        sendIPCToWindow(mainWindow, 'addTab', {
-          url: process.argv[1]
-        })
-      } else if (global.URLToOpen) {
-        // if there is a previously set URL to open (probably from opening a link on macOS), open it
-        sendIPCToWindow(mainWindow, 'addTab', {
-          url: global.URLToOpen
-        })
-        global.URLToOpen = null
-      }
-    })
-    */
-  })
-
-  // Open the DevTools.
-  // mainWindow.openDevTools()
-
+  createWindow()
   createAppMenu()
-  // createDockMenu()
- // registerProtocols()
 })
-
-app.on('open-url', function (e, url) {
-  if (appIsReady) {
-    sendIPCToWindow(mainWindow, 'addTab', {
-      url: url
-    })
-  } else {
-    global.URLToOpen = url // this will be handled later in the createWindow callback
-  }
-})
-
-/**
- * Emitted when the application is activated, which usually happens when clicks on the applications's dock icon
- * https://github.com/electron/electron/blob/master/docs/api/app.md#event-activate-os-x
- *
- * Opens a new tab when all tabs are closed, and min is still open by clicking on the application dock icon
- */
-app.on('activate', function (/* e, hasVisibleWindows */) {
-  if (!mainWindow && appIsReady) { // sometimes, the event will be triggered before the app is ready, and creating new windows will fail
-    createWindow()
-  }
-})
-
-function registerProtocols () {
-  protocol.registerStringProtocol('mailto', function (req, cb) {
-    electron.shell.openExternal(req.url)
-    return null
-  }, function (error) {
-    if (error) {
-      console.log('Could not register mailto protocol.')
-    }
-  })
-}
 
 function createAppMenu () {
   // create the menu. based on example from http://electron.atom.io/docs/v0.34.0/api/menu/
@@ -555,36 +414,4 @@ function createAppMenu () {
 
   menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
-}
-
-
-function createDockMenu () {
-  // create the menu. based on example from https://github.com/electron/electron/blob/master/docs/tutorial/desktop-environment-integration.md#custom-dock-menu-macos
-  if (process.platform === 'darwin') {
-    var Menu = electron.Menu
-
-    var template = [
-      {
-        label: l('appMenuNewTab'),
-        click: function (item, window) {
-          sendIPCToWindow(window, 'addTab')
-        }
-      },
-      {
-        label: l('appMenuNewPrivateTab'),
-        click: function (item, window) {
-          sendIPCToWindow(window, 'addPrivateTab')
-        }
-      },
-      {
-        label: l('appMenuNewTask'),
-        click: function (item, window) {
-          sendIPCToWindow(window, 'addTask')
-        }
-      }
-    ]
-
-    var dockMenu = Menu.buildFromTemplate(template)
-    app.dock.setMenu(dockMenu)
-  }
 }
