@@ -105,7 +105,7 @@ function createWindowWithBounds (bounds, shouldMaximize) {
   })
 
   /* handle pdf downloads - ipc recieved in fileDownloadManager.js */
-
+/*
   mainWindow.webContents.session.on('will-download', function (event, item, webContents) {
     var itemURL = item.getURL()
     if (item.getMimeType() === 'application/pdf' && itemURL.indexOf('blob:') !== 0 && itemURL.indexOf('#pdfjs.action=download') === -1) { // clicking the download button in the viewer opens a blob url, so we don't want to open those in the viewer (since that would make it impossible to download a PDF)
@@ -145,6 +145,7 @@ function createWindowWithBounds (bounds, shouldMaximize) {
 
   registerFiltering() // register filtering for the default session
 
+  */
   return mainWindow
 }
 
@@ -163,6 +164,7 @@ app.on('ready', function () {
   appIsReady = true
 
   createWindow(function () {
+    /*
     mainWindow.webContents.on('did-finish-load', function () {
       // if a URL was passed as a command line argument (probably because Min is set as the default browser on Linux), open it.
       if (process.argv && process.argv[1] && process.argv[1].toLowerCase() !== __dirname.toLowerCase() && process.argv[1].indexOf('://') !== -1) {
@@ -177,14 +179,15 @@ app.on('ready', function () {
         global.URLToOpen = null
       }
     })
+    */
   })
 
   // Open the DevTools.
   // mainWindow.openDevTools()
 
   createAppMenu()
-  createDockMenu()
-  registerProtocols()
+  // createDockMenu()
+ // registerProtocols()
 })
 
 app.on('open-url', function (e, url) {
