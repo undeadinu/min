@@ -74,6 +74,15 @@ function createWindowWithBounds (bounds, shouldMaximize) {
   // and load the index.html of the app.
   mainWindow.loadURL(browserPage)
 
+  if (shouldMaximize) {
+    mainWindow.maximize()
+  }
+
+  // save the window size for the next launch of the app
+  mainWindow.on('close', function () {
+    saveWindowBounds()
+  })
+
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
