@@ -1,6 +1,7 @@
 // cache host file entries for host matching
 var hosts = []
 
+/*
 var HOSTS_FILE = process.platform === 'win32'
   ? 'C:/Windows/System32/drivers/etc/hosts'
   : '/etc/hosts'
@@ -18,6 +19,7 @@ require('fs').readFile(HOSTS_FILE, 'utf8', function (err, data) {
     }
   })
 })
+*/
 
 var urlParser = {
   startingWWWRegex: /www\.(.+\..+\/)/g,
