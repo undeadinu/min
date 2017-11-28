@@ -10,12 +10,9 @@ var userDataPath = app.getPath('userData')
 
 const browserPage = 'file://' + __dirname + '/index.html'
 
-function l (str) {
-  return str
-}
-
 var mainWindow = null
 var isFocusMode = false
+var appIsReady = false
 
 function sendIPCToWindow (window, action, data) {
   // if there are no windows, create a new one
@@ -84,8 +81,20 @@ app.on('window-all-closed', function () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.on('ready', function () {
+  appIsReady = true
+
   createWindow()
   createAppMenu()
+})
+
+app.on('open-url', function (e, url) {
+  if (appIsReady) {
+    sendIPCToWindow(mainWindow, 'addTab', {
+      url: url
+    })
+  } else {
+    global.URLToOpen = url // this will be handled later in the createWindow callback
+  }
 })
 
 function createAppMenu () {
