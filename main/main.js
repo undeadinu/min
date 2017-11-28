@@ -52,7 +52,11 @@ function createWindowWithBounds (bounds, shouldMaximize) {
     width: bounds.width,
     height: bounds.height,
     x: bounds.x,
-    y: bounds.y
+    y: bounds.y,
+    minWidth: 320,
+    minHeight: 500,
+    titleBarStyle: 'hidden-inset',
+    icon: __dirname + '/icons/icon256.png'
   })
 
   // and load the index.html of the app.
@@ -94,6 +98,18 @@ app.on('open-url', function (e, url) {
     })
   } else {
     global.URLToOpen = url // this will be handled later in the createWindow callback
+  }
+})
+
+/**
+* Emitted when the application is activated, which usually happens when clicks on the applications's dock icon
+* https://github.com/electron/electron/blob/master/docs/api/app.md#event-activate-os-x
+*
+* Opens a new tab when all tabs are closed, and min is still open by clicking on the application dock icon
+*/
+app.on('activate', function (/* e, hasVisibleWindows */) {
+  if (!mainWindow && appIsReady) { // sometimes, the event will be triggered before the app is ready, and creating new windows will fail
+    createWindow()
   }
 })
 
