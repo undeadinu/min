@@ -72,7 +72,8 @@ module.exports = function (grunt) {
       main: {
         src: [
           'dist/localization.build.js',
-          'main/main.js'
+          'main/main.js',
+          'main/filtering.js'
         ],
         dest: 'main.build.js'
       }
