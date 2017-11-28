@@ -14,6 +14,12 @@ var mainWindow = null
 var isFocusMode = false
 var appIsReady = false
 
+var saveWindowBounds = function () {
+  if (mainWindow) {
+    fs.writeFile(path.join(userDataPath, 'windowBounds.json'), JSON.stringify(mainWindow.getBounds()))
+  }
+}
+
 function sendIPCToWindow (window, action, data) {
   // if there are no windows, create a new one
   if (!mainWindow) {
@@ -32,19 +38,25 @@ function openTabInWindow (url) {
 }
 
 function createWindow (cb) {
-  var size = electron.screen.getPrimaryDisplay().workAreaSize
-  var bounds = {
-    x: 0,
-    y: 0,
-    width: size.width,
-    height: size.height
-  }
+  var savedBounds = fs.readFile(path.join(userDataPath, 'windowBounds.json'), 'utf-8', function (e, data) {
+    if (e || !data) { // there was an error, probably because the file doesn't exist
+      var size = electron.screen.getPrimaryDisplay().workAreaSize
+      var bounds = {
+        x: 0,
+        y: 0,
+        width: size.width,
+        height: size.height
+      }
+    } else {
+      var bounds = JSON.parse(data)
+    }
 
-  createWindowWithBounds(bounds, false)
+    createWindowWithBounds(bounds, false)
 
-  if (cb) {
-    cb()
-  }
+    if (cb) {
+      cb()
+    }
+  })
 }
 
 function createWindowWithBounds (bounds, shouldMaximize) {
